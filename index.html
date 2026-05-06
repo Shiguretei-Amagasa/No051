@@ -1,84 +1,66 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="1894.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-    span.s1 {font: 12.0px 'Hiragino Sans'}
-  </style>
+<meta charset="UTF-8">
+<title>AR Message Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body {
+  background: #0a0f1c;
+  color: #00ffff;
+  font-family: monospace;
+  text-align: center;
+  padding-top: 50px;
+}
+input {
+  width: 70%;
+  padding: 10px;
+  background: black;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+}
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+}
+#qrcode {
+  margin-top: 30px;
+}
+</style>
 </head>
+
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="ja"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1">&lt;title&gt;AR Message Generator&lt;/title&gt;</p>
-<p class="p1">&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"&gt;&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1">body {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background: #0a0f1c;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>color: #00ffff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>font-family: monospace;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding-top: 50px;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">input {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>width: 70%;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background: black;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border: 1px solid #00ffff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>color: #00ffff;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">button {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>margin-top: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding: 10px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background: transparent;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border: 1px solid #00ffff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>color: #00ffff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>cursor: pointer;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">#qrcode {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>margin-top: 30px;</p>
-<p class="p1">}</p>
-<p class="p1">&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;h1&gt;AR MESSAGE&lt;/h1&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;input id="text" placeholder="<span class="s1">伝えたい言葉を入力</span>"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;br&gt;</p>
-<p class="p1">&lt;button onclick="generate()"&gt;GENERATE&lt;/button&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div id="qrcode"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">function generate() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const text = document.getElementById("text").value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const url = location.origin + "/ar.html?text=" + encodeURIComponent(text);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById("qrcode").innerHTML = "";</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>new QRCode(document.getElementById("qrcode"), {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>text: url,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>width: 200,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>height: 200</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p1">}</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<h1>AR MESSAGE</h1>
+
+<input id="text" placeholder="伝えたい言葉を入力">
+
+<br>
+<button onclick="generate()">GENERATE</button>
+
+<div id="qrcode"></div>
+
+<script>
+function generate() {
+  const text = document.getElementById("text").value;
+
+  // ★ GitHub Pages完全対応URL
+  const base = location.origin + location.pathname.replace("index.html", "");
+  const url = base + "ar.html?text=" + encodeURIComponent(text);
+
+  document.getElementById("qrcode").innerHTML = "";
+
+  new QRCode(document.getElementById("qrcode"), {
+    text: url,
+    width: 220,
+    height: 220
+  });
+}
+</script>
+
 </body>
 </html>
