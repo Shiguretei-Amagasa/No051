@@ -544,6 +544,8 @@ function generateQR() {
   const text = document.getElementById("msg-input").value.trim();
   if (!text) return;
 
+  document.getElementById("msg-input").value = ""; // 
+
   // Same page + ?text= (works on any host, including GitHub Pages)
   const base = location.href.split("?")[0];
   const url  = base + "?text=" + encodeURIComponent(text);
