@@ -4,12 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>No051</title>
-
 <link rel="apple-touch-icon" href="No051_512.png">
 <link rel="icon" type="image/png" href="No051_512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="No051">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap');
@@ -19,7 +17,6 @@
 :root {
   --cyan: #00e5ff;
   --cyan-dim: rgba(0,229,255,0.35);
-  --cyan-glow: rgba(0,229,255,0.12);
   --bg: #04080f;
   --panel-bg: rgba(0,18,35,0.6);
 }
@@ -29,34 +26,29 @@ body {
   color: var(--cyan);
   font-family: 'Share Tech Mono', monospace;
   min-height: 100dvh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-/* ─── SHARED ─── */
 .corner { position: absolute; width: 14px; height: 14px; border-color: var(--cyan); border-style: solid; }
 .corner.tl { top:0; left:0;  border-width: 2px 0 0 2px; }
 .corner.tr { top:0; right:0; border-width: 2px 2px 0 0; }
 .corner.bl { bottom:0; left:0;  border-width: 0 0 2px 2px; }
 .corner.br { bottom:0; right:0; border-width: 0 2px 2px 0; }
 
-/* ─────────────────────────────────────────
-   GENERATOR MODE
-───────────────────────────────────────── */
 #generator {
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100dvh;
-  padding: 28px 20px;
+  padding: 40px 20px 60px;
   background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,80,120,0.18) 0%, transparent 70%);
   position: relative;
 }
-
-/* Subtle animated grid */
 #generator::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background-image:
     linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
@@ -64,25 +56,11 @@ body {
   background-size: 36px 36px;
   animation: gridDrift 12s linear infinite;
   pointer-events: none;
+  z-index: 0;
 }
 @keyframes gridDrift {
   from { background-position: 0 0; }
   to   { background-position: 0 36px; }
-}
-
-.no-mark {
-  position: relative;
-  display: inline-block;
-}
-.no-sup {
-  position: absolute;
-  top: 0.04em;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.38em;
-  line-height: 1;
-  font-family: inherit;
-  font-weight: 600;
 }
 
 .gen-title {
@@ -96,26 +74,10 @@ body {
   position: relative;
   z-index: 1;
 }
-.no-mark {
-  position: relative;
-  display: inline-block;
-  letter-spacing: 0;
-  margin-right: 0.1em;
-}
-.no-sup {
-  position: absolute;
-  top: 0;
-  left: 100%;
-  font-size: 0.42em;
-  line-height: 1;
-  letter-spacing: 0;
-  font-weight: 400;
-}
 @keyframes titleBreath {
   0%,100% { opacity:1; }
-  50% { opacity: 0.75; }
+  50% { opacity:0.75; }
 }
-
 .gen-sub {
   font-size: 0.6em;
   letter-spacing: 0.3em;
@@ -125,7 +87,6 @@ body {
   z-index: 1;
 }
 
-/* Input group */
 .input-group {
   width: 100%;
   max-width: 420px;
@@ -133,9 +94,7 @@ body {
   margin-bottom: 22px;
   z-index: 1;
 }
-
 .input-group .corner { border-color: var(--cyan-dim); }
-
 .msg-input {
   width: 100%;
   padding: 15px 20px;
@@ -156,7 +115,6 @@ body {
   box-shadow: 0 0 28px rgba(0,229,255,0.18), inset 0 0 16px rgba(0,229,255,0.04);
 }
 
-/* Generate button */
 .gen-btn {
   position: relative;
   padding: 13px 48px;
@@ -176,7 +134,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(0,229,255,0.08) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent, rgba(0,229,255,0.08), transparent);
   transform: translateX(-100%);
   transition: transform 0.4s;
 }
@@ -184,20 +142,48 @@ body {
 .gen-btn:hover::before { transform: translateX(100%); }
 .gen-btn:active { opacity: 0.7; }
 
-/* QR display area */
+/* ─── QR + Marker area ─── */
 #qr-area {
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  margin-top: 32px;
+  gap: 28px;
+  margin-top: 36px;
   position: relative;
   z-index: 1;
+  width: 100%;
+  max-width: 420px;
   animation: fadeUp 0.4s ease both;
 }
 @keyframes fadeUp {
   from { opacity:0; transform: translateY(12px); }
   to   { opacity:1; transform: translateY(0); }
+}
+
+.step-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.step-num {
+  font-size: 0.52em;
+  letter-spacing: 0.35em;
+  color: rgba(0,229,255,0.35);
+}
+.step-label {
+  font-size: 0.58em;
+  letter-spacing: 0.2em;
+  color: rgba(0,229,255,0.5);
+  text-align: center;
+}
+.step-hint {
+  font-size: 0.48em;
+  letter-spacing: 0.12em;
+  color: rgba(0,229,255,0.22);
+  text-align: center;
+  line-height: 1.7;
 }
 
 .qr-wrap {
@@ -206,260 +192,35 @@ body {
   background: #fff;
   box-shadow: 0 0 40px rgba(0,229,255,0.25), 0 0 80px rgba(0,229,255,0.1);
 }
-.qr-wrap .corner { border-color: var(--cyan); border-width: 3px; width: 18px; height: 18px; }
+.qr-wrap .corner  { border-color: var(--cyan); border-width: 3px; width: 18px; height: 18px; }
 
-.qr-label {
-  font-size: 0.65em;
-  letter-spacing: 0.22em;
-  color: rgba(0,229,255,0.45);
-  text-align: center;
-}
-.qr-hint {
-  font-size: 0.55em;
-  letter-spacing: 0.15em;
-  color: rgba(0,229,255,0.22);
-  text-align: center;
-}
-
-/* ─────────────────────────────────────────
-   VIEWER MODE
-───────────────────────────────────────── */
-#viewer {
-  display: none;
-  position: fixed;
-  inset: 0;
-}
-
-/* Camera / fallback bg */
-#cam-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-}
-#fallback-bg {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 45%, #05141e 0%, #020508 100%);
-  z-index: 0;
-}
-#fallback-grid {
-  display: none;
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px);
-  background-size: 42px 42px;
-  animation: gridDrift 10s linear infinite;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* HUD corners (full screen) */
-.hud-corner {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  border-color: rgba(0,229,255,0.28);
-  border-style: solid;
-  z-index: 20;
-}
-.hud-corner.tl { top:16px; left:16px; border-width: 2px 0 0 2px; }
-.hud-corner.tr { top:16px; right:16px; border-width: 2px 2px 0 0; }
-.hud-corner.bl { bottom:16px; left:16px; border-width: 0 0 2px 2px; }
-.hud-corner.br { bottom:16px; right:16px; border-width: 0 2px 2px 0; }
-
-/* Center overlay */
-.viewer-center {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  pointer-events: none;
-}
-
-/* ─── Hologram panel ─── */
-.holo-panel {
-  position: relative;
-  width: min(88vw, 400px);
-  padding: 0;
-  overflow: visible;
-  animation: holoFloat 3.2s ease-in-out infinite;
-}
-
-@keyframes holoFloat {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-11px); }
-}
-
-/* Main panel body */
-.holo-body {
-  position: relative;
-  background: var(--panel-bg);
-  border: 1px solid rgba(0,229,255,0.5);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  overflow: hidden;
-  padding: 24px 22px 20px;
-}
-
-/* Scan line */
-.scan-line {
-  position: absolute;
-  left: 0; width: 100%; height: 1px;
-  background: linear-gradient(to right, transparent 0%, rgba(0,229,255,0.6) 50%, transparent 100%);
-  animation: scanMove 2.2s linear infinite;
-  z-index: 3;
-  pointer-events: none;
-}
-@keyframes scanMove {
-  0%   { top: 0%;   opacity: 0; }
-  8%   { opacity: 1; }
-  92%  { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
-/* Inner grid */
-.holo-body::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
-  background-size: 18px 18px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Header row */
-.holo-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.52em;
-  letter-spacing: 0.28em;
-  color: rgba(0,229,255,0.45);
-  margin-bottom: 18px;
-  position: relative;
-  z-index: 4;
-}
-.holo-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 6px var(--cyan);
-  animation: dotBlink 1.4s ease-in-out infinite;
-}
-@keyframes dotBlink { 0%,100% { opacity:1; } 50% { opacity:0.15; } }
-
-/* Message text */
-.holo-msg {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 400;
-  font-size: clamp(1.3em, 5.5vw, 2em);
-  color: var(--cyan);
-  text-align: center;
-  line-height: 1.45;
-  word-break: break-word;
-  text-shadow:
-    0 0  8px rgba(0,229,255,0.9),
-    0 0 22px rgba(0,229,255,0.5),
-    0 0 55px rgba(0,200,255,0.25);
-  position: relative;
-  z-index: 4;
-  letter-spacing: 0.04em;
-  animation: msgFlicker 9s ease-in-out infinite;
-}
-@keyframes msgFlicker {
-  0%,100% { opacity:1; }
-  91%     { opacity:1; }
-  92%     { opacity:0.55; }
-  93%     { opacity:1; }
-  95%     { opacity:0.8; }
-  96%     { opacity:1; }
-}
-
-/* Footer bars */
-.holo-foot {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 18px;
-  position: relative;
-  z-index: 4;
-}
-.h-bar {
-  height: 2px;
-  background: rgba(0,229,255,0.38);
-  animation: barPulse 2.2s ease-in-out infinite;
-}
-.h-bar:nth-child(1) { width: 44px; }
-.h-bar:nth-child(2) { width: 22px; animation-delay: 0.35s; }
-.h-bar:nth-child(3) { width: 60px; animation-delay: 0.7s; }
-@keyframes barPulse {
-  0%,100% { opacity:0.38; }
-  50%     { opacity:1; box-shadow: 0 0 6px var(--cyan); }
-}
-
-/* Glitch effect on panel */
-.holo-body {
-  animation: panelGlitch 7s ease-in-out infinite;
-}
-@keyframes panelGlitch {
-  0%,88%,100% { clip-path: none; }
-  89% { clip-path: inset(8% 0 84% 0);  transform: translate(-3px); }
-  90% { clip-path: inset(45% 0 42% 0); transform: translate(3px); }
-  91% { clip-path: none; transform: none; }
-}
-
-/* Vertical accent lines on sides of panel */
-.holo-panel::before,
-.holo-panel::after {
-  content: '';
-  position: absolute;
-  top: 10%; height: 80%;
+.step-divider {
   width: 1px;
-  background: linear-gradient(to bottom, transparent, rgba(0,229,255,0.4), transparent);
-  z-index: 0;
-}
-.holo-panel::before { left: -10px; }
-.holo-panel::after  { right: -10px; }
-
-/* Status bar bottom */
-.status-bar {
-  position: absolute;
-  bottom: 18px;
-  left: 0; right: 0;
-  text-align: center;
-  font-size: 0.52em;
-  letter-spacing: 0.22em;
-  color: rgba(0,229,255,0.28);
-  z-index: 20;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(0,229,255,0.3), transparent);
 }
 
-/* ─── Appear animation on load ─── */
-.viewer-center {
-  animation: sceneAppear 0.8s ease both;
+.marker-wrap {
+  position: relative;
+  padding: 10px;
+  background: #fff;
+  box-shadow: 0 0 30px rgba(0,229,255,0.2);
 }
-@keyframes sceneAppear {
-  from { opacity:0; transform: scale(0.94); }
-  to   { opacity:1; transform: scale(1); }
+.marker-wrap .corner { border-color: var(--cyan); border-width: 3px; width: 18px; height: 18px; }
+.marker-wrap img {
+  display: block;
+  width: 160px;
+  height: 160px;
+  image-rendering: pixelated;
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════ GENERATOR MODE ══════════ -->
 <div id="generator">
-  <div class="gen-title"><span style="position:relative;display:inline-block">N<span style="position:absolute;font-size:0.42em;top:0.5em;left:70%;line-height:1;letter-spacing:0">o</span></span><span style="margin-left:0.25em">051</span></div>
+  <div class="gen-title">
+    <span style="position:relative;display:inline-block">N<span style="position:absolute;font-size:0.42em;top:0.3em;left:70%;line-height:1;letter-spacing:0">o</span></span><span style="margin-left:0.25em">051</span>
+  </div>
   <div class="gen-sub">// minimum requirements //</div>
 
   <div class="input-group">
@@ -480,80 +241,65 @@ body {
   <button class="gen-btn" onclick="generateQR()">ENCRYPT</button>
 
   <div id="qr-area">
-    <div class="qr-wrap">
-      <div class="corner tl"></div>
-      <div class="corner tr"></div>
-      <div class="corner bl"></div>
-      <div class="corner br"></div>
-      <div id="qr-canvas"></div>
-    </div>
-    <div class="qr-label">相手のスマホでスキャンしてください</div>
-    <div class="qr-hint">SCAN → HOLOGRAM PROJECTION</div>
-  </div>
-</div>
 
-<!-- ══════════ VIEWER MODE ══════════ -->
-<div id="viewer">
-  <video id="cam-video" autoplay playsinline muted></video>
-  <div id="fallback-bg"></div>
-  <div id="fallback-grid"></div>
-
-  <div class="hud-corner tl"></div>
-  <div class="hud-corner tr"></div>
-  <div class="hud-corner bl"></div>
-  <div class="hud-corner br"></div>
-
-  <div class="viewer-center">
-    <div class="holo-panel">
-      <div class="holo-body">
-        <div class="scan-line"></div>
-        <div class="holo-head">
-          <span>MSG.RECV</span>
-          <div class="holo-dot"></div>
-          <span id="time-display">--:--</span>
-        </div>
-        <div class="holo-msg" id="holo-message">…</div>
-        <div class="holo-foot">
-          <div class="h-bar"></div>
-          <div class="h-bar"></div>
-          <div class="h-bar"></div>
-        </div>
+    <div class="step-block">
+      <div class="step-num">— STEP 01 —</div>
+      <div class="step-label">相手にスキャンしてもらう</div>
+      <div class="qr-wrap">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <div id="qr-canvas"></div>
       </div>
     </div>
-  </div>
 
-  <div class="status-bar">HOLOGRAM PROJECTION ACTIVE</div>
+    <div class="step-divider"></div>
+
+    <div class="step-block">
+      <div class="step-num">— STEP 02 —</div>
+      <div class="step-label">このマーカーにかざしてもらう</div>
+      <div class="marker-wrap">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <img
+          src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/data/images/hiro.png"
+          alt="AR Marker"
+        >
+      </div>
+      <div class="step-hint">
+        MINIMUM REQUIREMENTS<br>
+        近づかないと見えない
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-/* ── MODE DETECTION ──────────────────────── */
-const params  = new URLSearchParams(location.search);
-const message = params.get("text");
+document.getElementById("msg-input").addEventListener("keypress", e => {
+  if (e.key === "Enter") generateQR();
+});
 
-if (message) {
-  startViewer(message);
-} else {
-  document.getElementById("generator").style.display = "flex";
-  document.getElementById("msg-input").addEventListener("keypress", e => {
-    if (e.key === "Enter") generateQR();
-  });
-}
-
-/* ── GENERATOR ───────────────────────────── */
 function generateQR() {
   const text = document.getElementById("msg-input").value.trim();
   if (!text) return;
 
-  document.getElementById("msg-input").value = ""; // 
+  document.getElementById("msg-input").value = "";
 
-  // Same page + ?text= (works on any host, including GitHub Pages)
-  const base = location.href.split("?")[0];
+  // ar.html（同ディレクトリ）へのURLを生成
+  const base = new URL("ar.html", location.href).href;
   const url  = base + "?text=" + encodeURIComponent(text);
 
   const qrArea = document.getElementById("qr-area");
   const canvas = document.getElementById("qr-canvas");
   canvas.innerHTML = "";
   qrArea.style.display = "flex";
+
+  document.querySelector(".input-group").style.display = "none";
+  document.querySelector(".gen-btn").style.display     = "none";
 
   new QRCode(canvas, {
     text: url,
@@ -562,38 +308,6 @@ function generateQR() {
     colorDark:  "#000000",
     colorLight: "#ffffff"
   });
-}
-
-/* ── VIEWER ──────────────────────────────── */
-function startViewer(msg) {
-  document.getElementById("generator").style.display = "none";
-  document.getElementById("viewer").style.display    = "block";
-  document.getElementById("holo-message").textContent = msg;
-
-  updateTime();
-  setInterval(updateTime, 1000);
-
-  // Request rear camera on mobile
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } },
-    audio: false
-  })
-  .then(stream => {
-    document.getElementById("cam-video").srcObject = stream;
-  })
-  .catch(() => {
-    // No camera: show dark grid fallback
-    document.getElementById("cam-video").style.display    = "none";
-    document.getElementById("fallback-bg").style.display  = "block";
-    document.getElementById("fallback-grid").style.display = "block";
-  });
-}
-
-function updateTime() {
-  const now = new Date();
-  const hh  = String(now.getHours()).padStart(2, "0");
-  const mm  = String(now.getMinutes()).padStart(2, "0");
-  document.getElementById("time-display").textContent = hh + ":" + mm;
 }
 </script>
 </body>
