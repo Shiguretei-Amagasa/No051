@@ -6,11 +6,19 @@
 <title>No051 — AR Viewer</title>
 <link rel="apple-touch-icon" href="No051_512.png">
 <link rel="icon" type="image/png" href="No051_512.png">
+<script>
+// ── A-Frameより先にメッセージを取得・DOMに書き込む ──
+// これによりA-Frameがシーンを初期化する時点で値が確定している
+const _msg = decodeURIComponent(new URLSearchParams(location.search).get("text") || "NO MESSAGE");
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("msg-main").setAttribute("value", _msg);
+  document.getElementById("msg-glow").setAttribute("value", _msg);
+});
+</script>
 <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body { overflow: hidden; background: #000; }
 
 a-scene {
@@ -24,15 +32,15 @@ a-scene {
 .hud-corner {
   position: fixed;
   width: 44px; height: 44px;
-  border-color: rgba(0,229,255,0.3);
   border-style: solid;
+  border-color: rgba(0,229,255,0.3);
   z-index: 100;
   pointer-events: none;
 }
-.hud-corner.tl { top:16px; left:16px;   border-width: 2px 0 0 2px; }
-.hud-corner.tr { top:16px; right:16px;  border-width: 2px 2px 0 0; }
-.hud-corner.bl { bottom:16px; left:16px;  border-width: 0 0 2px 2px; }
-.hud-corner.br { bottom:16px; right:16px; border-width: 0 2px 2px 0; }
+.hud-corner.tl { top:16px; left:16px;   border-width:2px 0 0 2px; }
+.hud-corner.tr { top:16px; right:16px;  border-width:2px 2px 0 0; }
+.hud-corner.bl { bottom:16px; left:16px;  border-width:0 0 2px 2px; }
+.hud-corner.br { bottom:16px; right:16px; border-width:0 2px 2px 0; }
 
 /* Scan hint */
 #scan-hint {
@@ -115,9 +123,8 @@ a-scene {
   <div class="hint-text">MARKER を探しています</div>
 </div>
 
-<div id="status-bar">No.051 — MINIMUM REQUIREMENTS</div>
+<div id="status-bar">AR SCANNING — MINIMUM REQUIREMENTS</div>
 
-<!-- ─── A-Frame AR Scene ─── -->
 <a-scene
   vr-mode-ui="enabled: false"
   renderer="logarithmicDepthBuffer: true; precision: medium;"
@@ -134,13 +141,18 @@ a-scene {
     smoothThreshold="5"
     emitevents="true"
   >
-    <!-- ホログラム全体 -->
+
+    <!--
+      look-at="[camera]" : 常にカメラ（見ている人）の方向を向く
+      position の y値  : マーカー面からの高さ（大きいほど上に浮く）
+    -->
     <a-entity
       id="holo-root"
-      position="0 1.0 0"
+      position="0 0.5 0"
+      look-at="[camera]"
       animation__float="property: position;
-                         from: 0 1.0 0;
-                         to:   0 1.2 0;
+                         from: 0 0.5 0;
+                         to:   0 0.65 0;
                          dir: alternate;
                          dur: 2500;
                          loop: true;
@@ -149,24 +161,23 @@ a-scene {
 
       <!-- パネル背景 -->
       <a-plane
-        width="3.8" height="1.8"
+        width="3.5" height="1.6"
         color="#001828"
         opacity="0.82"
-        position="0 0 0"
       ></a-plane>
 
       <!-- 上ボーダー -->
-      <a-plane width="3.8" height="0.02" color="#00e5ff" opacity="0.8"
-        position="0 0.89 0.005"></a-plane>
+      <a-plane width="3.5" height="0.018" color="#00e5ff" opacity="0.8"
+        position="0 0.79 0.003"></a-plane>
       <!-- 下ボーダー -->
-      <a-plane width="3.8" height="0.02" color="#00e5ff" opacity="0.8"
-        position="0 -0.89 0.005"></a-plane>
+      <a-plane width="3.5" height="0.018" color="#00e5ff" opacity="0.8"
+        position="0 -0.79 0.003"></a-plane>
       <!-- 左ボーダー -->
-      <a-plane width="0.02" height="1.8" color="#00e5ff" opacity="0.35"
-        position="-1.89 0 0.005"></a-plane>
+      <a-plane width="0.018" height="1.6" color="#00e5ff" opacity="0.3"
+        position="-1.74 0 0.003"></a-plane>
       <!-- 右ボーダー -->
-      <a-plane width="0.02" height="1.8" color="#00e5ff" opacity="0.35"
-        position="1.89 0 0.005"></a-plane>
+      <a-plane width="0.018" height="1.6" color="#00e5ff" opacity="0.3"
+        position="1.74 0 0.003"></a-plane>
 
       <!-- ヘッダーラベル -->
       <a-text
@@ -175,32 +186,32 @@ a-scene {
         color="#00e5ff"
         opacity="0.35"
         width="3.0"
-        position="0 0.62 0.01"
+        position="0 0.55 0.01"
       ></a-text>
 
-      <!-- メッセージ（発光レイヤー） -->
+      <!-- メッセージ 発光レイヤー -->
       <a-text
         id="msg-glow"
-        value="..."
+        value=""
         align="center"
         color="#00e5ff"
         opacity="0.2"
-        width="4.2"
+        width="4.0"
         wrap-count="14"
         position="0 -0.05 0.008"
-        scale="1.06 1.06 1"
+        scale="1.05 1.05 1"
       ></a-text>
 
-      <!-- メッセージ（メイン） -->
+      <!-- メッセージ メイン -->
       <a-text
         id="msg-main"
-        value="..."
+        value=""
         align="center"
         color="#00e5ff"
         opacity="0.95"
-        width="3.8"
+        width="3.4"
         wrap-count="14"
-        position="0 -0.05 0.015"
+        position="0 -0.05 0.014"
         animation__pulse="property: opacity;
                            from: 0.95; to: 0.6;
                            dir: alternate;
@@ -210,16 +221,16 @@ a-scene {
       ></a-text>
 
       <!-- フッター装飾バー -->
-      <a-plane width="0.9" height="0.015" color="#00e5ff" opacity="0.5"
-        position="-0.6 -0.62 0.005"
+      <a-plane width="0.9" height="0.013" color="#00e5ff" opacity="0.5"
+        position="-0.6 -0.56 0.004"
         animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true">
       </a-plane>
-      <a-plane width="0.45" height="0.015" color="#00e5ff" opacity="0.5"
-        position="0.45 -0.62 0.005"
+      <a-plane width="0.45" height="0.013" color="#00e5ff" opacity="0.5"
+        position="0.45 -0.56 0.004"
         animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true; delay:400">
       </a-plane>
-      <a-plane width="1.1" height="0.015" color="#00e5ff" opacity="0.5"
-        position="0.1 -0.62 0.005"
+      <a-plane width="1.1" height="0.013" color="#00e5ff" opacity="0.5"
+        position="0.1 -0.56 0.004"
         animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true; delay:800">
       </a-plane>
 
@@ -231,22 +242,7 @@ a-scene {
 </a-scene>
 
 <script>
-const params  = new URLSearchParams(location.search);
-const message = params.get("text") || "NO MESSAGE";
-
-const scene = document.querySelector("a-scene");
-
-function setMessage() {
-  document.getElementById("msg-main").setAttribute("value", message);
-  document.getElementById("msg-glow").setAttribute("value", message);
-}
-
-if (scene.hasLoaded) {
-  setMessage();
-} else {
-  scene.addEventListener("loaded", setMessage);
-}
-
+// マーカーイベント
 const marker    = document.getElementById("hiro-marker");
 const scanHint  = document.getElementById("scan-hint");
 const statusBar = document.getElementById("status-bar");
