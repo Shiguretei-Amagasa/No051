@@ -87,6 +87,90 @@ body { overflow: hidden; background: #000; }
   font-family: monospace;
 }
 </style>
+
+<!-- Canvas テクスチャでテキストを描画するカスタムコンポーネント -->
+<script>
+AFRAME.registerComponent('canvas-message', {
+  schema: { value: { type: 'string', default: '' } },
+
+  init: function () {
+    var msg = this.data.value;
+
+    // ── Canvas にテキストを描画
+    var canvas  = document.createElement('canvas');
+    canvas.width  = 1024;
+    canvas.height = 512;
+    var ctx = canvas.getContext('2d');
+
+    // 背景
+    ctx.fillStyle = 'rgba(0, 24, 40, 0.92)';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // 上下ボーダーライン
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
+    ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(0, 3);   ctx.lineTo(1024, 3);   ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, 509); ctx.lineTo(1024, 509); ctx.stroke();
+
+    // 左右ボーダーライン（薄め）
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(2, 0);    ctx.lineTo(2, 512);    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(1022, 0); ctx.lineTo(1022, 512); ctx.stroke();
+
+    // ヘッダーラベル
+    ctx.fillStyle  = 'rgba(0, 229, 255, 0.35)';
+    ctx.font       = '28px monospace';
+    ctx.textAlign  = 'center';
+    ctx.fillText('MSG.RECV', 512, 60);
+
+    // メッセージ本文（グロー）
+    ctx.shadowColor   = 'rgba(0, 229, 255, 0.8)';
+    ctx.shadowBlur    = 24;
+    ctx.fillStyle     = '#00e5ff';
+    ctx.font          = 'bold 72px monospace';
+    ctx.textAlign     = 'center';
+
+    // 長いテキストは折り返す
+    var words    = msg.split('');
+    var lines    = [];
+    var line     = '';
+    var maxChars = 14;
+    for (var i = 0; i < words.length; i++) {
+      line += words[i];
+      if (line.length >= maxChars || i === words.length - 1) {
+        lines.push(line);
+        line = '';
+      }
+    }
+    var totalH  = lines.length * 90;
+    var startY  = (512 - totalH) / 2 + 72;
+    lines.forEach(function(l, idx) {
+      ctx.fillText(l, 512, startY + idx * 90);
+    });
+
+    ctx.shadowBlur = 0;
+
+    // フッター装飾バー
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.45)';
+    ctx.fillRect(180, 465, 280, 5);
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.25)';
+    ctx.fillRect(500, 465, 140, 5);
+
+    // ── Three.js テクスチャとして板に適用
+    var texture  = new THREE.CanvasTexture(canvas);
+    var geometry = new THREE.PlaneGeometry(2.5, 1.25);
+    var material = new THREE.MeshBasicMaterial({
+      map:         texture,
+      transparent: true,
+      side:        THREE.DoubleSide
+    });
+    var mesh = new THREE.Mesh(geometry, material);
+    this.el.setObject3D('msg-panel', mesh);
+  }
+});
+</script>
+
 </head>
 <body>
 
@@ -117,11 +201,6 @@ body { overflow: hidden; background: #000; }
     id="hiro-marker"
     emitevents="true"
   >
-    <!--
-      rotation="-90 0 0" でパネルをカメラ方向（真上）に向ける。
-      マーカーはテーブルなど平面に置かれ、カメラは上から見下ろすため
-      -90度回転でパネル面がカメラを向く。
-    -->
     <a-entity
       id="holo-root"
       position="0 0.01 0"
@@ -134,37 +213,8 @@ body { overflow: hidden; background: #000; }
                          loop: true;
                          easing: easeInOutSine"
     >
-      <!-- パネル背景 -->
-      <a-plane
-        id="holo-panel"
-        width="2.5" height="1.2"
-        color="#001828"
-        opacity="0.85"
-      ></a-plane>
-
-      <!-- 上ボーダー -->
-      <a-plane width="2.5" height="0.015" color="#00e5ff" opacity="0.85"
-        position="0 0.593 0.002"></a-plane>
-      <!-- 下ボーダー -->
-      <a-plane width="2.5" height="0.015" color="#00e5ff" opacity="0.85"
-        position="0 -0.593 0.002"></a-plane>
-      <!-- 左ボーダー -->
-      <a-plane width="0.015" height="1.2" color="#00e5ff" opacity="0.3"
-        position="-1.243 0 0.002"></a-plane>
-      <!-- 右ボーダー -->
-      <a-plane width="0.015" height="1.2" color="#00e5ff" opacity="0.3"
-        position="1.243 0 0.002"></a-plane>
-
-      <!-- フッター装飾バー -->
-      <a-plane width="0.7" height="0.012" color="#00e5ff" opacity="0.5"
-        position="-0.5 -0.45 0.002"
-        animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true">
-      </a-plane>
-      <a-plane width="0.35" height="0.012" color="#00e5ff" opacity="0.5"
-        position="0.35 -0.45 0.002"
-        animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true; delay:500">
-      </a-plane>
-
+      <!-- canvas-message コンポーネントがCanvasでテキストを描画しテクスチャとして貼る -->
+      <a-entity id="msg-entity"></a-entity>
     </a-entity>
   </a-marker>
 
@@ -172,62 +222,26 @@ body { overflow: hidden; background: #000; }
 </a-scene>
 
 <script>
-var scene  = document.querySelector("a-scene");
-var marker = document.getElementById("hiro-marker");
+// URLパラメータ取得
+var msg = new URLSearchParams(location.search).get('text') || 'NO MESSAGE';
 
-scene.addEventListener("loaded", function() {
-  // URLパラメータを取得
-  var msg = new URLSearchParams(location.search).get("text") || "NO MESSAGE";
-  var root = document.getElementById("holo-root");
-
-  // ── ヘッダーラベル（動的生成）
-  var header = document.createElement("a-text");
-  header.setAttribute("value",   "MSG.RECV");
-  header.setAttribute("align",   "center");
-  header.setAttribute("color",   "#00e5ff");
-  header.setAttribute("opacity", "0.35");
-  header.setAttribute("width",   "2.2");
-  header.setAttribute("position","0 0.38 0.004");
-  root.appendChild(header);
-
-  // ── メッセージ 発光レイヤー（動的生成）
-  var glow = document.createElement("a-text");
-  glow.setAttribute("value",      msg);
-  glow.setAttribute("align",      "center");
-  glow.setAttribute("color",      "#00e5ff");
-  glow.setAttribute("opacity",    "0.18");
-  glow.setAttribute("width",      "2.8");
-  glow.setAttribute("wrap-count", "14");
-  glow.setAttribute("position",   "0 -0.02 0.005");
-  glow.setAttribute("scale",      "1.06 1.06 1");
-  root.appendChild(glow);
-
-  // ── メッセージ メイン（動的生成）
-  var main = document.createElement("a-text");
-  main.setAttribute("value",      msg);
-  main.setAttribute("align",      "center");
-  main.setAttribute("color",      "#00e5ff");
-  main.setAttribute("opacity",    "0.95");
-  main.setAttribute("width",      "2.5");
-  main.setAttribute("wrap-count", "14");
-  main.setAttribute("position",   "0 -0.02 0.008");
-  main.setAttribute("animation__pulse",
-    "property: opacity; from: 0.95; to: 0.6; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine"
-  );
-  root.appendChild(main);
+// scene loaded 後にコンポーネントをセット
+document.querySelector('a-scene').addEventListener('loaded', function() {
+  document.getElementById('msg-entity').setAttribute('canvas-message', 'value', msg);
 });
 
 // マーカーイベント
-var scanHint  = document.getElementById("scan-hint");
-var statusBar = document.getElementById("status-bar");
+var marker    = document.getElementById('hiro-marker');
+var scanHint  = document.getElementById('scan-hint');
+var statusBar = document.getElementById('status-bar');
 
-marker.addEventListener("markerFound", function() {
-  scanHint.style.opacity = "0";
-  statusBar.textContent  = "HOLOGRAM PROJECTION ACTIVE";
+marker.addEventListener('markerFound', function() {
+  scanHint.style.opacity = '0';
+  statusBar.textContent  = 'HOLOGRAM PROJECTION ACTIVE';
 });
-marker.addEventListener("markerLost", function() {
-  scanHint.style.opacity = "1";
-  statusBar.textContent  = "AR SCANNING — MINIMUM REQUIREMENTS";
+marker.addEventListener('markerLost', function() {
+  scanHint.style.opacity = '1';
+  statusBar.textContent  = 'AR SCANNING — MINIMUM REQUIREMENTS';
 });
 </script>
 </body>
