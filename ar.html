@@ -6,34 +6,11 @@
 <title>No051 — AR Viewer</title>
 <link rel="apple-touch-icon" href="No051_512.png">
 <link rel="icon" type="image/png" href="No051_512.png">
-
-<!-- メッセージをHTMLに直接埋め込む（A-Frame初期化前に実行） -->
-<script>
-  window._AR_MESSAGE = new URLSearchParams(location.search).get("text") || "NO MESSAGE";
-  // a-text の value 属性をページ描画前に直接書き込む
-  document.addEventListener("DOMContentLoaded", function() {
-    ["msg-main","msg-glow"].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.setAttribute("text", "value", window._AR_MESSAGE);
-      }
-    });
-  });
-</script>
-
 <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
-
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { overflow: hidden; background: #000; }
-
-a-scene {
-  position: fixed;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
-}
 
 .hud-corner {
   position: fixed;
@@ -77,7 +54,7 @@ a-scene {
 .hint-frame .c-bl { position:absolute; bottom:-1px; left:-1px; width:20px; height:20px; border:2px solid rgba(0,229,255,0.7); border-right:none; border-top:none; }
 .hint-scan {
   position: absolute;
-  left:0; width:100%; height:1px;
+  left: 0; width: 100%; height: 1px;
   background: linear-gradient(to right, transparent, rgba(0,229,255,0.7), transparent);
   animation: scanMove 2s linear infinite;
 }
@@ -98,10 +75,9 @@ a-scene {
   0%,100% { opacity:0.55; }
   50%     { opacity:0.2; }
 }
-
 #status-bar {
   position: fixed;
-  bottom: 18px; left:0; right:0;
+  bottom: 18px; left: 0; right: 0;
   text-align: center;
   font-size: 0.5em;
   letter-spacing: 0.25em;
@@ -136,122 +112,112 @@ a-scene {
   embedded
   arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
 >
-
   <a-marker
     preset="hiro"
     id="hiro-marker"
-    smooth="true"
-    smoothCount="5"
-    smoothTolerance="0.01"
-    smoothThreshold="5"
     emitevents="true"
   >
     <!--
-      look-at="[camera]" でホログラムが常にカメラの方向を向く
-      position の y値でマーカーからの浮遊高さを調整
+      rotation="-90 0 0" でパネルをカメラ方向（真上）に向ける。
+      マーカーはテーブルなど平面に置かれ、カメラは上から見下ろすため
+      -90度回転でパネル面がカメラを向く。
     -->
     <a-entity
       id="holo-root"
-      position="0 1.0 0"
-      look-at="[camera]"
+      position="0 0.01 0"
+      rotation="-90 0 0"
       animation__float="property: position;
-                         from: 0 1.0 0;
-                         to:   0 1.2 0;
+                         from: 0 0.01 0;
+                         to:   0 0.08 0;
                          dir: alternate;
                          dur: 2500;
                          loop: true;
                          easing: easeInOutSine"
     >
-
       <!-- パネル背景 -->
-      <a-plane width="3.5" height="1.6" color="#001828" opacity="0.82"></a-plane>
+      <a-plane
+        id="holo-panel"
+        width="2.5" height="1.2"
+        color="#001828"
+        opacity="0.85"
+      ></a-plane>
 
       <!-- 上ボーダー -->
-      <a-plane width="3.5" height="0.018" color="#00e5ff" opacity="0.8"
-        position="0 0.79 0.003"></a-plane>
+      <a-plane width="2.5" height="0.015" color="#00e5ff" opacity="0.85"
+        position="0 0.593 0.002"></a-plane>
       <!-- 下ボーダー -->
-      <a-plane width="3.5" height="0.018" color="#00e5ff" opacity="0.8"
-        position="0 -0.79 0.003"></a-plane>
+      <a-plane width="2.5" height="0.015" color="#00e5ff" opacity="0.85"
+        position="0 -0.593 0.002"></a-plane>
       <!-- 左ボーダー -->
-      <a-plane width="0.018" height="1.6" color="#00e5ff" opacity="0.3"
-        position="-1.74 0 0.003"></a-plane>
+      <a-plane width="0.015" height="1.2" color="#00e5ff" opacity="0.3"
+        position="-1.243 0 0.002"></a-plane>
       <!-- 右ボーダー -->
-      <a-plane width="0.018" height="1.6" color="#00e5ff" opacity="0.3"
-        position="1.74 0 0.003"></a-plane>
-
-      <!-- ヘッダーラベル -->
-      <a-text
-        value="MSG.RECV"
-        align="center"
-        color="#00e5ff"
-        opacity="0.35"
-        width="3.0"
-        position="0 0.55 0.01"
-      ></a-text>
-
-      <!-- メッセージ 発光レイヤー -->
-      <a-text
-        id="msg-glow"
-        value=""
-        align="center"
-        color="#00e5ff"
-        opacity="0.2"
-        width="4.0"
-        wrap-count="14"
-        position="0 -0.05 0.008"
-        scale="1.06 1.06 1"
-      ></a-text>
-
-      <!-- メッセージ メイン -->
-      <a-text
-        id="msg-main"
-        value=""
-        align="center"
-        color="#00e5ff"
-        opacity="0.95"
-        width="3.5"
-        wrap-count="14"
-        position="0 -0.05 0.015"
-        animation__pulse="property: opacity;
-                           from: 0.95; to: 0.6;
-                           dir: alternate;
-                           dur: 3000;
-                           loop: true;
-                           easing: easeInOutSine"
-      ></a-text>
+      <a-plane width="0.015" height="1.2" color="#00e5ff" opacity="0.3"
+        position="1.243 0 0.002"></a-plane>
 
       <!-- フッター装飾バー -->
-      <a-plane width="0.8" height="0.013" color="#00e5ff" opacity="0.5"
-        position="-0.6 -0.58 0.004"
+      <a-plane width="0.7" height="0.012" color="#00e5ff" opacity="0.5"
+        position="-0.5 -0.45 0.002"
         animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true">
       </a-plane>
-      <a-plane width="0.4" height="0.013" color="#00e5ff" opacity="0.5"
-        position="0.4 -0.58 0.004"
-        animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true; delay:400">
-      </a-plane>
-      <a-plane width="1.0" height="0.013" color="#00e5ff" opacity="0.5"
-        position="0.1 -0.58 0.004"
-        animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true; delay:800">
+      <a-plane width="0.35" height="0.012" color="#00e5ff" opacity="0.5"
+        position="0.35 -0.45 0.002"
+        animation="property: opacity; from:0.5; to:1; dir:alternate; dur:1800; loop:true; delay:500">
       </a-plane>
 
     </a-entity>
   </a-marker>
 
   <a-entity camera></a-entity>
-
 </a-scene>
 
 <script>
-// A-Frameのシーンロード後にテキストをセット
-// a-text は A-Frame コンポーネントのため setAttribute("text", "value", msg) が必要
-document.querySelector("a-scene").addEventListener("loaded", function() {
-  var msg = window._AR_MESSAGE;
-  document.getElementById("msg-main").setAttribute("text", "value", msg);
-  document.getElementById("msg-glow").setAttribute("text", "value", msg);
+var scene  = document.querySelector("a-scene");
+var marker = document.getElementById("hiro-marker");
+
+scene.addEventListener("loaded", function() {
+  // URLパラメータを取得
+  var msg = new URLSearchParams(location.search).get("text") || "NO MESSAGE";
+  var root = document.getElementById("holo-root");
+
+  // ── ヘッダーラベル（動的生成）
+  var header = document.createElement("a-text");
+  header.setAttribute("value",   "MSG.RECV");
+  header.setAttribute("align",   "center");
+  header.setAttribute("color",   "#00e5ff");
+  header.setAttribute("opacity", "0.35");
+  header.setAttribute("width",   "2.2");
+  header.setAttribute("position","0 0.38 0.004");
+  root.appendChild(header);
+
+  // ── メッセージ 発光レイヤー（動的生成）
+  var glow = document.createElement("a-text");
+  glow.setAttribute("value",      msg);
+  glow.setAttribute("align",      "center");
+  glow.setAttribute("color",      "#00e5ff");
+  glow.setAttribute("opacity",    "0.18");
+  glow.setAttribute("width",      "2.8");
+  glow.setAttribute("wrap-count", "14");
+  glow.setAttribute("position",   "0 -0.02 0.005");
+  glow.setAttribute("scale",      "1.06 1.06 1");
+  root.appendChild(glow);
+
+  // ── メッセージ メイン（動的生成）
+  var main = document.createElement("a-text");
+  main.setAttribute("value",      msg);
+  main.setAttribute("align",      "center");
+  main.setAttribute("color",      "#00e5ff");
+  main.setAttribute("opacity",    "0.95");
+  main.setAttribute("width",      "2.5");
+  main.setAttribute("wrap-count", "14");
+  main.setAttribute("position",   "0 -0.02 0.008");
+  main.setAttribute("animation__pulse",
+    "property: opacity; from: 0.95; to: 0.6; dir: alternate; dur: 3000; loop: true; easing: easeInOutSine"
+  );
+  root.appendChild(main);
 });
 
 // マーカーイベント
-var marker    = document.getElementById("hiro-marker");
 var scanHint  = document.getElementById("scan-hint");
 var statusBar = document.getElementById("status-bar");
 
