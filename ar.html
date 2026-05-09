@@ -88,6 +88,19 @@ body { overflow: hidden; background: #000; }
 }
 </style>
 
+<!-- ビルボード：毎フレームカメラの方向を向き続けるコンポーネント -->
+<script>
+AFRAME.registerComponent('billboard', {
+  tick: function () {
+    var camera = document.querySelector('[camera]');
+    if (!camera) return;
+    var cameraPos = new THREE.Vector3();
+    camera.object3D.getWorldPosition(cameraPos);
+    this.el.object3D.lookAt(cameraPos);
+  }
+});
+</script>
+
 <!-- Canvas テクスチャでテキストを描画するカスタムコンポーネント -->
 <script>
 AFRAME.registerComponent('canvas-message', {
@@ -204,7 +217,7 @@ AFRAME.registerComponent('canvas-message', {
     <a-entity
       id="holo-root"
       position="0 0.01 0"
-      rotation="-90 0 0"
+      billboard
       animation__float="property: position;
                          from: 0 0.01 0;
                          to:   0 0.08 0;
