@@ -15,7 +15,7 @@
     ["msg-main","msg-glow"].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) {
-        el.setAttribute("value", window._AR_MESSAGE);
+        el.setAttribute("text", "value", window._AR_MESSAGE);
       }
     });
   });
@@ -242,11 +242,12 @@ a-scene {
 </a-scene>
 
 <script>
-// A-Frameのシーンロード後にも確実にテキストをセット（二重保険）
+// A-Frameのシーンロード後にテキストをセット
+// a-text は A-Frame コンポーネントのため setAttribute("text", "value", msg) が必要
 document.querySelector("a-scene").addEventListener("loaded", function() {
   var msg = window._AR_MESSAGE;
-  document.getElementById("msg-main").setAttribute("value", msg);
-  document.getElementById("msg-glow").setAttribute("value", msg);
+  document.getElementById("msg-main").setAttribute("text", "value", msg);
+  document.getElementById("msg-glow").setAttribute("text", "value", msg);
 });
 
 // マーカーイベント
